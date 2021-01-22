@@ -21,8 +21,8 @@ def training(n_epoch, lr, model_dir, train_loader, val_loader, model, device):
             data_size = len(data[0])
 
             optimizer.zero_grad()  # 用 optimizer 將 model 參數的 gradient 歸零
-            train_pred = model(data[0])  # 利用 model 得到預測的機率分佈 這邊實際上就是去呼叫 model 的 forward 函數
-            batch_loss = loss(train_pred, data[1])  # 計算 loss （注意 prediction 跟 label 必須同時在 CPU 或是 GPU 上）
+            train_pred = model(data[0].to(device))  # 利用 model 得到預測的機率分佈 這邊實際上就是去呼叫 model 的 forward 函數
+            batch_loss = loss(train_pred, data[1].to(device))  # 計算 loss （注意 prediction 跟 label 必須同時在 CPU 或是 GPU 上）
             batch_loss.backward()  # 利用 back propagation 算出每個參數的 gradient
             optimizer.step()  # 以 optimizer 用 gradient 更新參數值
 
@@ -42,8 +42,8 @@ def training(n_epoch, lr, model_dir, train_loader, val_loader, model, device):
         with torch.no_grad():
             for i, data in enumerate(val_loader):
                 data_size = len(data[0])
-                val_pred = model(data[0])
-                batch_loss = loss(val_pred, data[1])
+                val_pred = model(data[0].to(device))
+                batch_loss = loss(val_pred, data[1].to(device))
 
                 val_acc = np.sum(np.argmax(val_pred.cpu().data.numpy(), axis=1) == data[1].numpy()) / data_size
                 val_loss = batch_loss.item()
