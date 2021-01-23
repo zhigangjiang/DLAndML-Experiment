@@ -16,7 +16,7 @@ def train_word2vec(x):
 
 
 path_prefix = "./model"
-data_dir = "/Users/jiangzhigang/Projects/DLAndML-Experiment/Data/H4_RNN"
+data_dir = "/Data/H3_CNN"
 training_label_path = os.path.join(data_dir, "training_label.txt")
 training_nolabel_path = os.path.join(data_dir, "training_nolabel.txt")
 testing_data_path = os.path.join(data_dir, "testing_data.txt")

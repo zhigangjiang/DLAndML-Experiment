@@ -12,8 +12,9 @@ def training(n_epoch, lr, model_dir, train_loader, val_loader, model, device):
     v_batch = len(val_loader)
     best_acc = 0
     for epoch in range(n_epoch):
-        epoch_start_time = time.time()
+        print("epoch:{}".format(epoch))
 
+        epoch_start_time = time.time()
         total_acc = 0.0
         total_loss = 0.0
         model.train()  # 確保 model 是在 train model (開啟 Dropout 等...)

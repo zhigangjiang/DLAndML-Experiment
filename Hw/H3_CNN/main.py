@@ -36,6 +36,7 @@ epoch = 500
 
 # 通過 torch.cuda.is_available() 的回傳值進行判斷是否有使用 GPU 的環境，如果有的話 device 就設為 "cuda"，沒有的話就設為 "cpu"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("device: {}".format(device))
 
 train_transforms = transforms.Compose([
     transforms.ToPILImage(),
@@ -56,4 +57,5 @@ val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
 
 model = CNN5().to(device)
 
+print("start training")
 training(epoch, lr, model_dir, train_loader, val_loader, model, device)
