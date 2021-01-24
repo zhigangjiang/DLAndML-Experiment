@@ -14,8 +14,8 @@ class TwitterDataset(data.Dataset):
     __len__ will return the number of data
     """
 
-    def __init__(self, X, y):
-        self.data = X
+    def __init__(self, x, y):
+        self.data = x
         self.label = y
 
     def __getitem__(self, idx):

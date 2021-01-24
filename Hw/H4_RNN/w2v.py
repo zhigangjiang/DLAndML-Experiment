@@ -6,6 +6,25 @@
 import os
 from gensim.models import word2vec
 from Hw.H4_RNN.utils import *
+import argparse
+
+
+parser = argparse.ArgumentParser(usage="it's usage tip.", description="help info.")
+parser.add_argument("--checkpoint_dir", default="./checkpoints", type=str, help="the output checkpoints dir",
+                    dest="checkpoint_dir")
+parser.add_argument("--data_dir", required=True, type=str, help="the dataset root dir", dest="data_dir")
+args = parser.parse_args()
+print("arguments:")
+for arg in vars(args):
+    print(arg, ":", getattr(args, arg))
+
+print("-" * 100)
+
+checkpoint_dir = args.checkpoint_dir
+data_dir = args.data_dir
+
+if not os.path.isdir(checkpoint_dir):
+    os.mkdir(checkpoint_dir)
 
 
 def train_word2vec(x):
@@ -15,12 +34,10 @@ def train_word2vec(x):
     return model
 
 
-path_prefix = "./model"
-data_dir = "/Data/H3_CNN"
 training_label_path = os.path.join(data_dir, "training_label.txt")
 training_nolabel_path = os.path.join(data_dir, "training_nolabel.txt")
 testing_data_path = os.path.join(data_dir, "testing_data.txt")
-w2v_all_model_path = os.path.join(path_prefix, 'w2v_all.model')
+w2v_all_model_path = os.path.join(checkpoint_dir, 'w2v_all.model')
 
 if __name__ == "__main__":
     print("loading training data ...")

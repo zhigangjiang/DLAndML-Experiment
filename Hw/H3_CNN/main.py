@@ -2,12 +2,11 @@ import os
 import torch
 
 from Hw.H3_CNN.model import CNN5
-from Hw.H3_CNN.test import evaluate, test
 from Hw.H3_CNN.train import training
 from Hw.H3_CNN.data import ImgDataset
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from Hw.H3_CNN.util import get_best_checkpoint_path
+from Hw.H3_CNN.utils import get_best_checkpoint_path, test, evaluate
 
 from torch import nn
 import torch.optim as optim
@@ -20,6 +19,8 @@ parser.add_argument("--mode", choices=['train', 'continue', 'evaluate', 'test'],
                     help="the run mode", dest="mode")
 parser.add_argument("--all_train", default=False, type=ast.literal_eval, help="is train dataset: train and evaluate.",
                     dest="all_train")
+parser.add_argument("--visible_device", default=0, type=int, help="visible device",
+                    dest="visible_device")
 parser.add_argument("--data_dir", required=True, type=str, help="the dataset root dir", dest="data_dir")
 parser.add_argument("--checkpoint_dir", default="./checkpoints", type=str, help="the output checkpoints dir",
                     dest="checkpoint_dir")
@@ -38,18 +39,23 @@ print("-" * 100)
 mode = args.mode
 all_train = args.all_train
 data_dir = args.data_dir
+visible_device = args.visible_device
+
 lr = float(args.lr)
 batch_size = int(args.batch_size)
 checkpoint_dir = args.checkpoint_dir
 checkpoint_path = args.checkpoint_path
 start_epoch = 0
 epoch = 500
+best_acc = 0
+
+torch.cuda.set_device(visible_device)
 
 if not os.path.isdir(checkpoint_dir):
     os.mkdir(checkpoint_dir)
 
 if mode == "train" and len([f for f in os.listdir(checkpoint_dir) if f.__contains__(".pth")]) > 0:
-    ans = input("checkpoints--0 is not empty, do you cover? [y/n]")
+    ans = input("checkpoints is not empty, do you cover? [y/n]")
     if ans != 'y':
         exit(0)
 
@@ -57,8 +63,11 @@ if mode == "train" and len([f for f in os.listdir(checkpoint_dir) if f.__contain
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device: {}".format(device))
 
+########################################################################################################################
 model = CNN5().to(device)
 optimizer = optim.Adam(model.parameters(), lr=lr)  # optimizer 使用 Adam
+loss = nn.CrossEntropyLoss()  # 因為是 classification task，所以 loss 使用 CrossEntropyLoss
+
 if mode != "train":
     checkpoint_path = checkpoint_path if len(checkpoint_path) != 0 else get_best_checkpoint_path(checkpoint_dir)
     print("load checkpoint_path:{}".format(checkpoint_path))
@@ -66,6 +75,7 @@ if mode != "train":
     model.load_state_dict(checkpoint['net'])  # 加载模型可学习参数
     optimizer.load_state_dict(checkpoint['optimizer'])  # 加载优化器参数
     start_epoch = checkpoint['epoch']  # 设置开始的epoch
+    best_acc = checkpoint['best_acc']
 
 train_transforms = transforms.Compose([
     transforms.ToPILImage(),
@@ -78,7 +88,6 @@ test_transforms = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-loss = nn.CrossEntropyLoss()  # 因為是 classification task，所以 loss 使用 CrossEntropyLoss
 if mode == "test":
     test_set = ImgDataset([os.path.join(data_dir, "testing")], test_transforms)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
@@ -90,10 +99,9 @@ if mode == "test":
             f.write('{},{}\n'.format(i, y))
 
 else:
-    val_loader = None
-    if not all_train:
-        val_set = ImgDataset([os.path.join(data_dir, "validation")], test_transforms)
-        val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
+
+    val_set = ImgDataset([os.path.join(data_dir, "validation")], test_transforms)
+    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
 
     if mode == "train" or mode == "continue":
         train_set = ImgDataset(
@@ -101,8 +109,8 @@ else:
                 os.path.join(data_dir, "training")],
             train_transforms)
         train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
-        print("start training")
-        training(start_epoch, epoch, optimizer, checkpoint_dir, train_loader, val_loader, model, loss, all_train, device)
+        training(start_epoch, epoch, optimizer, checkpoint_dir, train_loader, val_loader, model, loss, best_acc,
+                 all_train,
+                 device)
     else:
-        val_loss, val_acc = evaluate(model, val_loader, loss, device)
-        print("Valid | Loss:{:.5f} Acc: {:.3f} ".format(val_loss, val_acc))
+        val_loss, val_acc = evaluate(start_epoch, model, val_loader, loss, device, None, is_train=False)

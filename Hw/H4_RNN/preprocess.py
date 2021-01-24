@@ -83,6 +83,7 @@ class Preprocess:
             sentence_list.append(sentence_idx)
         return torch.LongTensor(sentence_list)
 
+    @staticmethod
     def labels_to_tensor(y):
         # 把 labels 轉成 tensor
         y = [int(label) for label in y]
