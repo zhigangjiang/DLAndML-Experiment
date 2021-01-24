@@ -36,8 +36,10 @@ class CNN5(nn.Module, ABC):
         )
         self.fc = nn.Sequential(
             nn.Linear(512 * 4 * 4, 1024),
+            nn.Dropout(0.5),
             nn.ReLU(),
             nn.Linear(1024, 512),
+            nn.Dropout(0.5),
             nn.ReLU(),
             nn.Linear(512, 11)
         )
