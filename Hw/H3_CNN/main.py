@@ -1,16 +1,15 @@
-import os
-import torch
 
 from Hw.H3_CNN.model import CNN5
 from Hw.H3_CNN.train import training
 from Hw.H3_CNN.data import ImgDataset
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
 from Hw.H3_CNN.utils import get_best_checkpoint_path, test, evaluate
 
+
+import os
+import torch
+from torch.utils.data import DataLoader
 from torch import nn
 import torch.optim as optim
-
 import argparse
 import ast
 
@@ -64,6 +63,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device: {}".format(device))
 
 ########################################################################################################################
+
 model = CNN5().to(device)
 optimizer = optim.Adam(model.parameters(), lr=lr)  # optimizer 使用 Adam
 loss = nn.CrossEntropyLoss()  # 因為是 classification task，所以 loss 使用 CrossEntropyLoss
@@ -77,19 +77,8 @@ if mode != "train":
     start_epoch = checkpoint['epoch']  # 设置开始的epoch
     best_acc = checkpoint['best_acc']
 
-train_transforms = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.RandomHorizontalFlip(),  # 隨機將圖片水平翻轉
-    transforms.RandomRotation(15),  # 隨機旋轉圖片
-    transforms.ToTensor(),  # 將圖片轉成 Tensor，並把數值 normalize 到 [0,1] (data normalization)
-])
-test_transforms = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.ToTensor(),
-])
-
 if mode == "test":
-    test_set = ImgDataset([os.path.join(data_dir, "testing")], test_transforms)
+    test_set = ImgDataset(data_dir, ["testing"], mode)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
     prediction = test(model, test_loader, device)
     with open(os.path.join(checkpoint_dir, "predict.csv"), 'w') as f:
@@ -100,14 +89,11 @@ if mode == "test":
 
 else:
 
-    val_set = ImgDataset([os.path.join(data_dir, "validation")], test_transforms)
+    val_set = ImgDataset(data_dir, ["validation"], mode)
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
 
     if mode == "train" or mode == "continue":
-        train_set = ImgDataset(
-            [os.path.join(data_dir, "training"), os.path.join(data_dir, "validation")] if all_train else [
-                os.path.join(data_dir, "training")],
-            train_transforms)
+        train_set = ImgDataset(data_dir, ["training", "validation"] if all_train else ["training"], mode)
         train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
         training(start_epoch, epoch, optimizer, checkpoint_dir, train_loader, val_loader, model, loss, best_acc,
                  all_train,

@@ -8,12 +8,14 @@ from Hw.H4_RNN.preprocess import Preprocess
 from Hw.H4_RNN.train import training
 from Hw.H4_RNN.utils import *
 import torch.utils.data
-import argparse
-import ast
+
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch import nn
 
+
+import argparse
+import ast
 parser = argparse.ArgumentParser(usage="it's usage tip.", description="help info.")
 parser.add_argument("--mode", choices=['train', 'continue', 'evaluate', 'test'], required=True, type=str,
                     help="the run mode", dest="mode")
