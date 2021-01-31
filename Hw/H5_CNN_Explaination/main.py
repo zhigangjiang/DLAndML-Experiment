@@ -70,7 +70,8 @@ img_indices = [830, 4218, 4707, 8598]
 images, labels = train_set.get_batch(img_indices)
 
 ########################################################################################################################
-
+# 这里需要对输入进行微分，主要在对图片进行微分时，不需要再对网络权重微分说，所以又model.eval()，这个在后面attack时是一样的道理，
+# 与attack不一样的是，这里是可视化梯度，attack是应用梯度方向 * eps
 if mode == "saliency":
     saliencies = compute_saliency_maps(images, labels, model, device)
 
@@ -95,7 +96,7 @@ if mode == "saliency":
     # 從第三、四張圖片的 saliency，雖然不知道 model 細部用食物的哪個位置判斷，但可以發現 model 找出了食物的大致輪廓
 
 ########################################################################################################################
-
+# 对model中cnn layer 进行 visualization
 if mode == "explaination":
     filter_activations, filter_visualizations = filter_explaination(copy.deepcopy(images), model, device=device,
                                                                     cnnid=34,
@@ -117,7 +118,8 @@ if mode == "explaination":
     # 因此給 filter 看一堆對比強烈的線條，他會覺得有好多 boundary 可以 activate
 
 ########################################################################################################################
-
+# 核心思想，先分割随机遮挡得到不同分割图片，先用model得到预测值，用linear model进行拟合**各个**分割图片要求linear model输出和nn model一样
+# 这里就体现一个思想：用简单model拟合复杂model，从最简单的linear model的weigh来表现复杂model侧重部分
 if mode == "lime":
     fig, axs = plt.subplots(1, 4, figsize=(15, 8))
     np.random.seed(16)

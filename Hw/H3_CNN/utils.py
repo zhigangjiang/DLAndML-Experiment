@@ -22,8 +22,8 @@ def evaluate(epoch, model, loader, loss, device, optimizer, is_train):
         torch.set_grad_enabled(True)
 
     else:
-        model.eval()
-        torch.set_grad_enabled(False)
+        model.eval()  # fix BN and DropOut
+        torch.set_grad_enabled(False)  # 和with torch.no_grad()一样 关闭grad计算，节省gpu空间
 
     for i, data in enumerate(loader):
         inputs = data[0].to(device)
