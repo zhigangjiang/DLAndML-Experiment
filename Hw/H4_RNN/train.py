@@ -2,13 +2,12 @@ import torch
 import time
 import os
 from Hw.H4_RNN.utils import evaluate
+from Hw.H3_CNN.utils import show_model_parameter_number
 
 
 def training(star_epoch, n_epoch, optimizer, checkpoint_dir, train_loader, val_loader, model, loss, best_acc, all_train,
              device):
-    total = sum(p.numel() for p in model.parameters())
-    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print('start training, parameter total:{}, trainable:{}'.format(total, trainable))
+    show_model_parameter_number(model, "model")
 
     for epoch in range(star_epoch, n_epoch):
         print("-" * 100)
@@ -24,7 +23,6 @@ def training(star_epoch, n_epoch, optimizer, checkpoint_dir, train_loader, val_l
 
         if cur_acc > best_acc:
             best_acc = cur_acc
-
             checkpoint = {
                 "net": model.state_dict(),
                 'optimizer': optimizer.state_dict(),

@@ -10,7 +10,6 @@ from lime import lime_image
 
 import os
 import torch
-from torch.utils.data import DataLoader
 from torch import nn
 import torch.optim as optim
 import argparse

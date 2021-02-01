@@ -4,9 +4,9 @@ import torch
 import numpy as np
 
 
-def get_best_checkpoint_path(checkpoint_dir):
+def get_best_checkpoint_path(checkpoint_dir, filter='*'):
     best_mode_path = os.path.join(checkpoint_dir, sorted([file_name for file_name in os.listdir(checkpoint_dir)
-                                                          if file_name.__contains__(".pth")],
+                                                          if file_name.__contains__(".pth") and ((file_name.__contains__(filter) or filter == '*') if not filter.startswith('!') else (not file_name.__contains__(filter)))],
                                                          key=lambda file_name: float(
                                                              file_name.split("_")[-1].split(".pth")[0]),
                                                          reverse=True)[0])
@@ -62,3 +62,9 @@ def test(model, test_loader, device):
             for y in test_label:
                 prediction.append(y)
     return prediction
+
+
+def show_model_parameter_number(model, name):
+    total = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print('{} parameter total:{}, trainable:{}'.format(name, total, trainable))
