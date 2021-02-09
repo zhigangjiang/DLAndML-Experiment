@@ -85,6 +85,8 @@ train_x, train_y = load_training_data(training_label_path)
 test_x = load_testing_data(testing_data_path)
 
 preprocess = Preprocess(train_x, sen_len, w2v_path=w2v_all_model_path)
+# word ->(word2index) index ->(embedding_matrix) vector
+# 注意embedding层不是一个nn层，在这里是一个list，idx -> vector
 embedding = preprocess.make_embedding(load=True)
 train_x = preprocess.sentence_word2idx()
 train_y = preprocess.labels_to_tensor(train_y)

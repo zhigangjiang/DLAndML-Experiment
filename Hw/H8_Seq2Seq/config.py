@@ -11,7 +11,7 @@ class configurations(object):
         self.store_steps = 300  # 訓練多少次後須儲存模型
         self.summary_steps = 300  # 訓練多少次後須檢驗是否有overfitting
         self.load_model = False  # 是否需載入模型
-        self.store_model_path = "./ckpt"  # 儲存模型的位置
+        self.store_model_path = "./checkpoints"  # 儲存模型的位置
         self.load_model_path = None  # 載入模型的位置 e.g. "./ckpt/model_{step}"
-        self.data_path = "./cmn-eng"  # 資料存放的位置
+        self.data_path = "../../Data/H8_Seq2Seq/cmn-eng"  # 資料存放的位置
         self.attention = False  # 是否使用 Attention Mechanism
