@@ -23,8 +23,16 @@ class FaceDataset(Dataset):
 
     def __getitem__(self, idx):
         fname = self.fnames[idx]
+
         img = cv2.imread(fname)
-        img = self.BGR2RGB(img)  # because "torchvision.utils.save_image" use RGB
+        if img is None:
+            print(fname)
+
+        try:
+            img = self.BGR2RGB(img)  # because "torchvision.utils.save_image" use RGB
+        except AssertionError:
+            print("ss")
+
         img = self.transform(img)
         return img
 

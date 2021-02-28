@@ -20,7 +20,7 @@ parser.add_argument("--data_dir", required=True, type=str, help="the dataset roo
 parser.add_argument("--checkpoint_dir", default="./checkpoints", type=str, help="the output checkpoints dir",
                     dest="checkpoint_dir")
 parser.add_argument("--lr", default=1e-4, type=float, help="the learning rate of adama.", dest="lr")
-parser.add_argument("--batch_size", default=64, type=int, help="batch_size", dest="batch_size")
+parser.add_argument("--batch_size", default=128, type=int, help="batch_size", dest="batch_size")
 parser.add_argument("--checkpoint_path", default="", type=str, help="the output checkpoints path",
                     dest="checkpoint_path")
 args = parser.parse_args()

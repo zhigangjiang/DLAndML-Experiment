@@ -2,6 +2,7 @@ import random
 import torch
 import numpy as np
 
+
 def same_seeds(seed):
     torch.manual_seed(seed)
     if torch.cuda.is_available():

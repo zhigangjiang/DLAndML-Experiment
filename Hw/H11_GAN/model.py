@@ -22,8 +22,7 @@ class Generator(nn.Module):
 
         def dconv_bn_relu(in_dim, out_dim):
             return nn.Sequential(
-                nn.ConvTranspose2d(in_dim, out_dim, 5, 2,
-                                   padding=2, output_padding=1, bias=False),
+                nn.ConvTranspose2d(in_dim, out_dim, 5, 2, padding=2, output_padding=1, bias=False),
                 nn.BatchNorm2d(out_dim),
                 nn.ReLU())
 
@@ -36,12 +35,12 @@ class Generator(nn.Module):
             dconv_bn_relu(dim * 4, dim * 2),
             dconv_bn_relu(dim * 2, dim),
             nn.ConvTranspose2d(dim, 3, 5, 2, padding=2, output_padding=1),
-            nn.Tanh())
+            nn.Tanh())  # -1 ~ 1
         self.apply(weights_init)
 
     def forward(self, x):
         y = self.l1(x)
-        y = y.view(y.size(0), -1, 4, 4)
+        y = y.view(y.size(0), -1, 4, 4)  # 4 * 4 * 8dim
         y = self.l2_5(y)
         return y
 
@@ -67,7 +66,7 @@ class Discriminator(nn.Module):
             conv_bn_lrelu(dim * 2, dim * 4),
             conv_bn_lrelu(dim * 4, dim * 8),
             nn.Conv2d(dim * 8, 1, 4),
-            nn.Sigmoid())
+            nn.Sigmoid())  # 0 ~ 1
         self.apply(weights_init)
 
     def forward(self, x):
