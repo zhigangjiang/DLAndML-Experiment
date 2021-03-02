@@ -13,9 +13,9 @@ def train(n_epoch, checkpoint_dir, dataloader, G, optimizer_G, D, optimizer_D, l
     for e, epoch in enumerate(range(n_epoch)):
         for i, data in enumerate(dataloader):
             imgs = data
-            imgs = imgs.cuda()
+            imgs = imgs.to(device)
 
-            bs = imgs.size(0)
+            bs = imgs.size(0)  # batch size
 
             """ Train D """
             z = Variable(torch.randn(bs, z_dim)).to(device)
@@ -23,16 +23,16 @@ def train(n_epoch, checkpoint_dir, dataloader, G, optimizer_G, D, optimizer_D, l
             f_imgs = G(z)
 
             # label
-            r_label = torch.ones((bs)).cuda()
-            f_label = torch.zeros((bs)).cuda()
+            r_label = torch.ones(bs).to(device)
+            f_label = torch.zeros(bs).to(device)
 
             # dis
             r_logit = D(r_imgs.detach())
             f_logit = D(f_imgs.detach())
 
             # compute loss
-            r_loss = loss(r_logit, r_label)
-            f_loss = loss(f_logit, f_label)
+            r_loss = loss(r_logit, r_label)  # -log(r_logit)/bs
+            f_loss = loss(f_logit, f_label)  # -log(1 - f_logit)/bs
             loss_D = (r_loss + f_loss) / 2
 
             # update model
@@ -49,7 +49,7 @@ def train(n_epoch, checkpoint_dir, dataloader, G, optimizer_G, D, optimizer_D, l
             f_logit = D(f_imgs)
 
             # compute loss
-            loss_G = loss(f_logit, r_label)
+            loss_G = loss(f_logit, r_label)  # -log(f_logit)/bs 尽可能使生成的图产生的loss小 => discriminator输出的f_logit要大，即越像真的越好
 
             # update model
             G.zero_grad()

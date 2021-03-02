@@ -2,6 +2,7 @@ from Hw.H11_GAN.model import Generator, Discriminator
 from Hw.H11_GAN.utils import same_seeds
 from Hw.H11_GAN.data import FaceDataset, DataLoader
 from Hw.H11_GAN.train import train
+from Hw.H11_GAN.test import test
 
 import os
 import torch
@@ -40,7 +41,7 @@ batch_size = int(args.batch_size)
 checkpoint_dir = args.checkpoint_dir
 checkpoint_path = args.checkpoint_path
 start_epoch = 0
-epoch = 500
+epoch = 10  # 测试发现多个epoch并不会产生更好的效果，后面更像存在周期：坏-好-坏-好...
 
 torch.cuda.set_device(visible_device)
 
@@ -62,24 +63,27 @@ print("device: {}".format(device))
 z_dim = 100
 
 # model
-G = Generator(in_dim=z_dim).cuda()
-D = Discriminator(3).cuda()
-G.train()
-D.train()
+G = Generator(in_dim=z_dim).to(device)
+if mode == "train":
+    D = Discriminator(3).to(device)
+    G.train()
+    D.train()
 
-# loss criterion
-loss = nn.BCELoss()
+    # loss criterion
+    loss = nn.BCELoss()
 
-# optimizer
-optimizer_D = torch.optim.Adam(D.parameters(), lr=lr, betas=(0.5, 0.999))
-optimizer_G = torch.optim.Adam(G.parameters(), lr=lr, betas=(0.5, 0.999))
+    # optimizer
+    optimizer_D = torch.optim.Adam(D.parameters(), lr=lr, betas=(0.5, 0.999))
+    optimizer_G = torch.optim.Adam(G.parameters(), lr=lr, betas=(0.5, 0.999))
 
+    same_seeds(0)
+    # dataloader (You might need to edit the dataset path if you use extra dataset.)
+    dataset = FaceDataset(data_dir)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    train(epoch, checkpoint_dir, dataloader, G, optimizer_G, D, optimizer_D, loss, z_dim, device)
 
-same_seeds(0)
-# dataloader (You might need to edit the dataset path if you use extra dataset.)
-dataset = FaceDataset(data_dir)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-
-
-train(epoch, checkpoint_dir, dataloader, G, optimizer_G, D, optimizer_D, loss, z_dim, device)
-
+elif mode == "test":
+    G.load_state_dict(torch.load(os.path.join(checkpoint_dir, f'dcgan_g.pth')))
+    G.eval()
+    G.to(device)
+    test(20, checkpoint_dir, G, z_dim, device)
